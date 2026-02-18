@@ -16,8 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from polls.schema import schema
+from strawberry.django.views import AsyncGraphQLView
+
 
 urlpatterns = [
+    path("graphql/", AsyncGraphQLView.as_view(schema=schema)),
     path('admin/', admin.site.urls),
     path('polls/', include("polls.urls"))
 ]

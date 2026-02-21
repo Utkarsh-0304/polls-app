@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        body {
+            text-align: center;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h2>Login to Polls</h2>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <p>Don't have an account? <a href="{% url 'signup' %}">Signup here</a></p>
+      <button type="submit">Login</button>
+    </form>
+</body>
+</html>

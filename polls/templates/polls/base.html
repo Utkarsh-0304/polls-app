@@ -1,0 +1,38 @@
+<!-- {% load static %} -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Polls Application{% endblock %}</title>
+
+</head>
+
+<body style="width: 100%; overflow-x: hidden;">
+    <header style="border-bottom-style:solid; border-width: 1px; border-color:black ;height: 3rem; margin: 0; padding: 0 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+        <a style="text-decoration: none; color:black; cursor: default;" href="{% url 'polls:index' %}"><p>Polls Application</p></a>
+        {% if user.is_authenticated %}
+        <div style="display: flex; align-items: center; gap: 1rem">
+        <p style="margin: 0; padding: 4px;">Welcome, <a href="{% url 'polls:user_page' user.username %}">{{ user.username }}</a>!</p>
+
+        <form method="post" action="{% url 'logout' %}" style="margin: 0; display: flex; align-items: center;">
+            {% csrf_token %}
+            <button type="submit">Log Out</button>
+        </form>
+        </div>
+        {% endif %}
+    </header>
+
+    <main style="margin: auto;">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer style="width: 100%; position: absolute; bottom: 0; display: flex; justify-content: center;">
+        <p>&copy; 2026 Polls Application </p>
+    </footer>
+</body>
+
+</html>

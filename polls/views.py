@@ -1,19 +1,24 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.db.models import F
 from django.views import generic
+from django.utils import timezone
+from django.views.decorators.cache import never_cache
+from django.utils.decorators import method_decorator
+
 
 from .models import Question, Choice
 
 
+@method_decorator(never_cache, name='dispatch')
 class IndexView(generic.ListView):
     template_name = "polls/index.html"
     context_object_name = "latest_question_list"
 
     def get_queryset(self):
         """Return the last five published questions."""
-        return Question.objects.filter(user=self.request.user).order_by("-pub_date")[:5]
+        return Question.objects.order_by("-pub_date")[:5]
 
 
 class DetailView(generic.DetailView):
@@ -43,3 +48,42 @@ def vote(request, question_id):
         selected_choice.votes = F("votes") + 1
         selected_choice.save()
         return HttpResponseRedirect(reverse("polls:results", args=(question.id,)))
+    
+def create_poll(request):
+
+    if request.method == "POST":
+
+        question_text = request.POST.get('question_text')
+        q = Question.objects.create(
+            question_text=question_text,
+            pub_date=timezone.now(),
+            user=request.user
+        )
+
+        choice_list = request.POST.getlist('choice')
+
+        for text in choice_list:
+            if text.strip():
+                Choice.objects.create(
+                    choice_text=text,
+                    question=q
+                )
+        
+        return redirect("polls:index")
+
+    return render(request, "polls/create_poll.html")
+
+def user_page(request, username):
+    return render(request, "polls/user_page.html", {"user_polls": Question.objects.filter(user=request.user).order_by("-pub_date")})
+
+def delete_poll(request, question_id):
+
+    if request.method == "POST":
+        q = get_object_or_404(Question, id=question_id)
+
+        if q.user == request.user:
+            q.delete()
+
+        return redirect("polls:user_page", username=request.user.username)
+
+    return redirect("polls:user_page", username=request.user.username)

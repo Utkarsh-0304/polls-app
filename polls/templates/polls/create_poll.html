@@ -1,0 +1,26 @@
+{% extends "polls/base.html" %}
+
+{% block content %}
+<h2>Create a New Poll</h2>
+
+<form method="post" action="">
+    {% csrf_token %}
+    
+    <div style="margin-bottom: 20px;">
+        <label for="q_text">Question Text:</label><br>
+        <input type="text" id="q_text" name="question_text" required style="width: 80%; padding: 8px;">
+    </div>
+
+    <h3>Choices</h3>
+    <div id="choices-container">
+        <input type="text" name="choice" placeholder="Choice 1" required style="display: block; margin-bottom: 10px; width: 80%;"><br>
+        <input type="text" name="choice" placeholder="Choice 2" required style="display: block; margin-bottom: 10px; width: 80%;"><br>
+        <input type="text" name="choice" placeholder="Choice 3" style="display: block; margin-bottom: 10px; width: 80%;"><br>
+        <input type="text" name="choice" placeholder="Choice 4" style="display: block; margin-bottom: 10px; width: 80%;"><br>
+    </div>
+
+    <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer;">
+        Save Poll
+    </button>
+</form>
+{% endblock %}

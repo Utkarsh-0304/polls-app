@@ -1,21 +1,40 @@
-<div style="height: 3rem; margin: 0; padding: 0 1rem; display: flex; align-items: center; justify-content: flex-end; gap: 1rem;">
-{% if user.is_authenticated %}
-    <p style="margin: 0; padding: 4px;;">Welcome, {{ user.username }}!</p>
-    
-    <form method="post" action="{% url 'logout' %}" style="margin: 0; display: flex; align-items: center;">
-        {% csrf_token %}
-        <button type="submit">Log Out</button>
-    </form>
-{% endif %}
-</div>
-<h2>Your Polls</h2>
-{% if latest_question_list %}
-    <ul>
-    {% for question in latest_question_list %}
-        <li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No polls are available.</p>
-{% endif %}
+{% extends "polls/base.html" %}
 
+{% block content %}
+<div>
+    <h2>All Polls</h2>
+    <form action="{% url 'polls:create_poll' %}">
+        <button>Create a Poll</button>
+    </form>
+    {% if latest_question_list %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; padding: 1rem 0;">
+            {% for question in latest_question_list %}
+            <div style="background-color: white; border: 1px solid #e0e0e0; border-radius: 10px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; display: flex; flex-direction: column; justify-content: space-between;">
+                
+                <!-- Question Title -->
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; line-height: 1.4;">
+                    <a href="" style="text-decoration: none; color: black; font-weight: 600;">
+                        {{ question.question_text }}
+                    </a>
+                </h3>
+
+                <span style="font-size: small;">Published On: {{ question.pub_date }}</span>
+
+                <!-- Meta Info (Bottom aligned) -->
+                <div style="border-top: 1px solid #f0f0f0; pt: 0.8rem; margin-top: auto; display: flex; align-items: center; justify-content: space-between;">
+                    <p style="margin: 0.8rem 0 0 0; font-size: 0.85rem; color: #5f6368;">
+                        By <span style="color: #202124; font-weight: 500;">{{ question.user.username }}</span>
+                    </p>
+                    
+                    <!-- Small Indicator or Arrow -->
+                    <!-- <span style="margin-top: 0.8rem; color: #1a73e8; font-size: 1.2rem;">&rarr;</span> -->
+                </div>
+                
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No polls are available.</p>
+    {% endif %}
+</div>
+{% endblock %}

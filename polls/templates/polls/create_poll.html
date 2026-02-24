@@ -1,26 +1,111 @@
 {% extends "polls/base.html" %}
 
 {% block content %}
-<h2>Create a New Poll</h2>
+<div
+    style="max-width: 650px; margin: 2rem auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
 
-<form method="post" action="">
-    {% csrf_token %}
-    
-    <div style="margin-bottom: 20px;">
-        <label for="q_text">Question Text:</label><br>
-        <input type="text" id="q_text" name="question_text" required style="width: 80%; padding: 8px;">
+    <div style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.75rem; color: #1a202c; margin-bottom: 0.5rem;">Create a New Poll</h2>
+        <p style="color: #718096; margin: 0;">Fill in the details below to start gathering community feedback.</p>
     </div>
 
-    <h3>Choices</h3>
-    <div id="choices-container">
-        <input type="text" name="choice" placeholder="Choice 1" required style="display: block; margin-bottom: 10px; width: 80%;"><br>
-        <input type="text" name="choice" placeholder="Choice 2" required style="display: block; margin-bottom: 10px; width: 80%;"><br>
-        <input type="text" name="choice" placeholder="Choice 3" style="display: block; margin-bottom: 10px; width: 80%;"><br>
-        <input type="text" name="choice" placeholder="Choice 4" style="display: block; margin-bottom: 10px; width: 80%;"><br>
+    <div
+        style="background-color: #ebf4ff; border-left: 4px solid #4299e1; padding: 1rem; margin-bottom: 2rem; border-radius: 4px;">
+        <p style="margin: 0; font-size: 0.9rem; color: #2b6cb0;">
+            <strong>Tip:</strong> Keep your question clear and concise for better engagement!
+        </p>
     </div>
 
-    <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer;">
-        Save Poll
-    </button>
-</form>
+    <form method="post" action="{% url 'polls:create_poll' %}"
+        style="background: white; padding: 2rem; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        {% csrf_token %}
+
+        <div style="margin-bottom: 2rem;">
+            <label for="q_text" style="display: block; font-weight: 600; margin-bottom: 8px; color: #4a5568;">
+                Poll Question
+            </label>
+            <input type="text" id="dynamic_q_text" name="question_text"
+                placeholder="e.g., Coffee or Tea?" required
+                style="width: 100%; padding: 12px; border: 2px solid #edf2f7; border-radius: 8px; font-size: 1rem; box-sizing: border-box; outline: none; transition: all 0.3s ease;">
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #edf2f7; margin-bottom: 2rem;">
+
+        <div style="margin-bottom: 2rem;">
+            <h3
+                style="font-size: 1.1rem; color: #2d3748; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                <span
+                    style="background: black; color: white; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.8rem;">?</span>
+                Define Choices
+            </h3>
+
+            <div id="choices-container" style="display: flex; flex-direction: column; gap: 12px;">
+                <input type="text" name="choice" placeholder="Choice 1 (Required)" required autocomplete="off"
+                    style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box;">
+
+                <input type="text" name="choice" placeholder="Choice 2 (Required)" required autocomplete="off"
+                    style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box;">
+
+                <input type="text" name="choice" placeholder="Choice 3 (Optional)" autocomplete="off"
+                    style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; display: none;">
+                
+                <input type="text" name="choice" placeholder="Choice 4 (Optional)" autocomplete="off"
+                    style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; display: none;">
+            </div>
+            <button type="button" id="add_choice" style="float: right;margin-top: 8px;background-color: rgb(44, 41, 41); border-radius: 4px; border: none; color: white; padding: 5px 10px;">+ Add choice</button>
+            <p style="font-size: 0.8rem; color: #a0aec0; margin-top: 8px;">Minimum of 2 choices required. Maximum of 4 choices.</p>
+        </div>
+
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <button type="submit" disabled class="publish-btn"
+                style="flex: 2; padding: 14px; background-color: black; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: not-allowed; font-size: 1rem; opacity: 0.5" >
+                Publish Poll
+            </button>
+
+            <a href="{{ previous_url }}"
+                style="flex: 1; text-align: center; text-decoration: none; color: #718096; font-size: 0.9rem; font-weight: 500; padding: 14px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    const input = document.getElementById('dynamic_q_text');
+
+    const addChoiceBtn = document.getElementById("add_choice")
+    let i = 2;
+    const container = document.getElementById('choices-container')
+    addChoiceBtn.addEventListener('click', () => {
+        container.children[i++].style.display = "block"
+        if (i >= 4) {
+            addChoiceBtn.disabled = true;
+            addChoiceBtn.style.opacity = "50%"
+            addChoiceBtn.removeEventListener();
+        }
+    })
+
+    const publishBtn = document.getElementsByClassName('publish-btn')[0];
+    const inputForm = document.getElementsByTagName('form')[1]
+    console.log(inputForm) 
+    inputForm.addEventListener('input', () => {
+        const inputs = container.querySelectorAll('input[required]');
+        const allFilled = Array.from(inputs).every(input => input.value.trim().length > 0) && input.value.trim().length > 0;        
+
+        publishBtn.disabled = !allFilled;
+        publishBtn.style.opacity = allFilled ? "1" : "0.5";
+        publishBtn.style.cursor = allFilled ? "pointer" : "not-allowed";
+    });
+
+</script>
+{% endblock %}
+
+{% block extracss %}
+<style>
+#choices-container:nth-child(3):hover {
+    display: none;
+}
+</style>
 {% endblock %}

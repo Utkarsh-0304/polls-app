@@ -69,9 +69,9 @@ def create_poll(request):
                     question=q
                 )
         
-        return redirect("polls:index")
+        return redirect(request.META.get('HTTP_REFERER'))
 
-    return render(request, "polls/create_poll.html")
+    return render(request, "polls/create_poll.html", {'previous_url': request.META.get('HTTP_REFERER')})
 
 def user_page(request, username):
     return render(request, "polls/user_page.html", {"user_polls": Question.objects.filter(user=request.user).order_by("-pub_date")})

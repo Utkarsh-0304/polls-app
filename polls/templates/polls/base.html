@@ -1,38 +1,55 @@
-<!-- {% load static %} -->
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height: 100%;">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>{% block title %}Polls Application{% endblock %}</title>
 
+    {% block extracss %}
+    {% endblock %}
 </head>
 
-<body style="width: 100%; overflow-x: hidden;">
-    <header style="border-bottom-style:solid; border-width: 1px; border-color:black ;height: 3rem; margin: 0; padding: 0 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
-        <a style="text-decoration: none; color:black; cursor: default;" href="{% url 'polls:index' %}"><p>Polls Application</p></a>
-        {% if user.is_authenticated %}
-        <div style="display: flex; align-items: center; gap: 1rem">
-        <p style="margin: 0; padding: 4px;">Welcome, <a href="{% url 'polls:user_page' user.username %}">{{ user.username }}</a>!</p>
+<body style="margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8f9fa; color: #212529;">
 
-        <form method="post" action="{% url 'logout' %}" style="margin: 0; display: flex; align-items: center;">
-            {% csrf_token %}
-            <button type="submit">Log Out</button>
-        </form>
-        </div>
-        {% endif %}
+    <header style="background-color: #ffffff; border-bottom: 1px solid #dee2e6; height: 4rem; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.02); z-index: 1000;">
+        <a href="{% url 'polls:index' %}" style="text-decoration: none; color: black; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.5px;">
+            POLLS<span style="color: black;">APP</span>
+        </a>
+
+        <nav style="display: flex; align-items: center; gap: 1.5rem;">
+            {% if user.is_authenticated %}
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-size: 0.9rem; color: #6c757d;">
+                        Logged in as <a href="{% url 'polls:user_page' user.username %}" style="color: black; text-decoration: none; font-weight: 600;">{{ user.username }}</a>
+                    </span>
+                    <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s;">
+                            Log Out
+                        </button>
+                    </form>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" style="text-decoration: none; color: #4a5568; font-size: 0.9rem; font-weight: 500;">Login</a>
+                <a href="{% url 'signup' %}" style="text-decoration: none; background-color: #4c51bf; color: white; padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">Sign Up</a>
+            {% endif %}
+        </nav>
     </header>
 
-    <main style="margin: auto;">
+    <main style="flex: 1; width: 100%; max-width: 1200px; margin: 0 auto; padding: 2rem 1rem;">
         {% block content %}
         {% endblock %}
     </main>
 
-    <footer style="width: 100%; position: absolute; bottom: 0; display: flex; justify-content: center;">
-        <p>&copy; 2026 Polls Application </p>
+    <footer style="background-color: #ffffff; border-top: 1px solid #dee2e6; padding: 1.5rem 0; text-align: center; margin-top: auto;">
+        <p style="margin: 0; color: #adb5bd; font-size: 0.85rem;">
+            &copy; 2026 Polls Application &bull; Built with Django
+        </p>
     </footer>
-</body>
 
+    {% block script %}
+    {% endblock %}
+</body>
 </html>

@@ -2,7 +2,30 @@
 
 {% block content %}
 <div style="max-width: 500px; margin: 2rem auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.05); background-color: #ffffff;">
-    
+
+    {% if question.id|stringformat:"s" in request.session.voted_polls %}
+        <div style="background-color: #f0fff4; border: 1px solid #c6f6d5; color: #2f855a; padding: 15px; border-radius: 8px; text-align: center;">
+            <p style="margin: 0; font-weight: 600;">✅ You've already voted!</p>
+            <a href="{% url 'polls:results' question.id %}" style="display: inline-block; margin-top: 10px; color: #4c51bf; text-decoration: none; font-weight: 500;">View Results →</a>
+        </div>
+
+         <fieldset style="border: none; padding: 0; margin-top: 1rem; opacity: 0.8;">
+            <legend style="margin-bottom: 20px;">
+                <h1 style="font-size: 1.5rem; color: #1a1a1a; margin: 0; line-height: 1.2;">
+                    {{ question.question_text }}
+                </h1>
+            </legend>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                {% for choice in question.choice_set.all %}
+                <div style="display: flex; align-items: center; padding: 12px 16px; border-radius: 8px; transition: background 0.2s; background-color:  {% if choice.id == selected_choice %}#4ed34c{% else %}#f7fafc{% endif %} ; border: 1px solid #e2e8f0;">
+                    <div style= "font-size: 1rem; color:{% if choice.id == selected_choice %}white{% else %}#4a5568{% endif %} ; width: 100%; ">
+                        {{ choice.choice_text }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+    {% else %}
     <form action="{% url 'polls:vote' question.id %}" method="post">
         {% csrf_token %}
         
@@ -39,5 +62,6 @@
             </a>
         </div>
     </form>
+    {% endif %}
 </div>
 {% endblock %}

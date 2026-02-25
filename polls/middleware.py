@@ -16,10 +16,8 @@ class PollViewCounterMiddleware:
                 question_id = str(match.kwargs.get('pk'))
                 if question_id:
                     viewed_polls = request.session.get('viewed_polls', {})
-                    print(viewed_polls)
                     current_time = time.time()
                     last_view_time = viewed_polls.get(question_id, 0)
-                    print(last_view_time)
 
                     if current_time - last_view_time > 3600:
                         Question.objects.filter(id=question_id).update(views=F('views') + 1)

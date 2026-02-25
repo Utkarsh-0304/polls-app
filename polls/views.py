@@ -6,6 +6,7 @@ from django.views import generic
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
+from django.contrib import messages
 
 
 from .models import Question, Choice
@@ -25,6 +26,14 @@ class DetailView(generic.DetailView):
     model = Question
     template_name = "polls/detail.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        voted_polls = self.request.session.get('voted_polls', {})
+        
+        context['selected_choice'] = voted_polls.get(str(self.object.id))
+        
+        return context
+
 
 class ResultsView(generic.DetailView):
     model = Question
@@ -32,6 +41,12 @@ class ResultsView(generic.DetailView):
 
 
 def vote(request, question_id):
+
+    voted_polls = request.session.get('voted_polls', {})
+    if question_id in voted_polls:
+        messages.error(request, "You have already voted on this poll.")
+        return HttpResponseRedirect(reverse("polls:results", args=(question_id,)))
+
     question = get_object_or_404(Question, pk=question_id)
     try:
         selected_choice = question.choice_set.get(pk=request.POST["choice"])
@@ -47,6 +62,11 @@ def vote(request, question_id):
     else:
         selected_choice.votes = F("votes") + 1
         selected_choice.save()
+
+        voted_polls[question.id] = selected_choice.id
+        request.session['voted_polls'] = voted_polls
+        request.session.modified = True
+
         return HttpResponseRedirect(reverse("polls:results", args=(question.id,)))
     
 def create_poll(request):
@@ -69,7 +89,7 @@ def create_poll(request):
                     question=q
                 )
         
-        return redirect(request.META.get('HTTP_REFERER'))
+        return render(request, "polls/create_poll.html", {"success_message": "Poll created successfully"})
 
     return render(request, "polls/create_poll.html", {'previous_url': request.META.get('HTTP_REFERER')})
 

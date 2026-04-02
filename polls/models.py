@@ -41,3 +41,14 @@ class Choice(models.Model):
             return (self.votes / total) * 100 
         else:
             return 0
+        
+class Comment(models.Model):
+    text = models.CharField(max_length=400)
+    likes = models.IntegerField(default=0)
+    dislikes = models.IntegerField(default=0)
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField("created at")
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.text

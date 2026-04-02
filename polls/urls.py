@@ -12,5 +12,6 @@ urlpatterns = [
     path("<int:question_id>/vote/", login_required(views.vote), name="vote"),
     path("create_poll/", login_required(views.create_poll), name="create_poll"),
     path("delete_poll/<int:question_id>", login_required(views.delete_poll), name="delete_poll"),
-    path("user/<str:username>", login_required(views.user_page), name="user_page")
+    path("user/<str:username>", login_required(views.user_page), name="user_page"),
+    path("<int:question_id>/create_comment/", login_required(views.create_comment), name="create_comment")
 ]

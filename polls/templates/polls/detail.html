@@ -56,10 +56,6 @@
 
         <div style="margin-top: 24px; display: flex; align-items: center; justify-content: space-between;">
             <input type="submit" value="Submit Vote" style="background-color: black; color: white; padding: 10px 24px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.95rem; box-shadow: 0 2px 4px rgba(76, 81, 191, 0.2);">
-            
-            <a href="{% url 'polls:results' question.id %}" style="text-decoration: none; color: #718096; font-size: 0.85rem; font-weight: 500;">
-                View Results
-            </a>
         </div>
     </form>
     {% endif %}

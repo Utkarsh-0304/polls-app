@@ -9,7 +9,7 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 
 
-from .models import Question, Choice
+from .models import Question, Choice, Comment
 
 
 @method_decorator(never_cache, name='dispatch')
@@ -38,6 +38,18 @@ class DetailView(generic.DetailView):
 class ResultsView(generic.DetailView):
     model = Question
     template_name = "polls/results.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        all_comments = self.object.comment_set.all().order_by('-created_at')
+        
+        # Get user's comments and others' comments separately
+        user_comments = all_comments.filter(creator=self.request.user)
+        other_comments = all_comments.exclude(creator=self.request.user)
+        
+        # Combine them: User first, then the rest
+        context['sorted_comments'] = list(user_comments) + list(other_comments)
+        return context
 
 
 def vote(request, question_id):
@@ -107,3 +119,29 @@ def delete_poll(request, question_id):
         return redirect("polls:user_page", username=request.user.username)
 
     return redirect("polls:user_page", username=request.user.username)
+
+def create_comment(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+
+    if request.method != "POST":
+        return redirect("polls:results", pk=question.id)
+
+    comment_text = (request.POST.get("comment_text") or "").strip()
+    if not comment_text:
+        messages.error(request, "Comment cannot be empty.")
+        return redirect("polls:results", pk=question.id)
+
+    Comment.objects.create(
+        text=comment_text,
+        creator=request.user,
+        created_at=timezone.now(),
+        question=question,
+    )
+
+    messages.success(request, "Comment added.")
+    return redirect("polls:results", pk=question.id)
+
+    
+
+        
+        

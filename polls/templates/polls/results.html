@@ -1,7 +1,8 @@
 {% extends "polls/base.html" %}
 
 {% block content %}
-<div style="max-width: 600px; margin: 2rem auto; padding: 2rem; border: 1px solid #e2e8f0; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+<div
+    style="max-width: 600px; margin: 2rem auto; padding: 2rem; border: 1px solid #e2e8f0; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
 
     <h1 style="font-size: 1.75rem; color: #1a202c; margin-top: 0; margin-bottom: 1.5rem; line-height: 1.2;">
         {{ question.question_text }}
@@ -10,27 +11,111 @@
     <div style="display: flex; flex-direction: column; gap: 1.5rem;">
         {% for choice in question.choice_set.all %}
         <div style="position: relative;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600; color: #4a5568;">
+            <div
+                style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600; color: #4a5568;">
                 <span style="font-size: 1rem;">{{ choice.choice_text }}</span>
                 <span style="font-size: 0.9rem; color: #718096;">
-                    {{ choice.votes }} vote{{ choice.votes|pluralize }}
+                    {{ choice.votes }} vote{{ choice.votes|pluralize }} | {{ choice.get_percent|floatformat:2 }}%
                 </span>
             </div>
             <div style="width: 100%; height: 12px; background-color: #edf2f7; border-radius: 10px; overflow: hidden;">
-                <div style="width: {{  choice.get_percent }}%; height: 100%; background-color: black; border-radius: 10px;"></div>
+                <div
+                    style="width: {{  choice.get_percent }}%; height: 100%; background-color: black; border-radius: 10px;">
+                </div>
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <div style="margin-top: 2.5rem; border-top: 1px solid #edf2f7; padding-top: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
-        <a href="{% url 'polls:detail' question.id %}" style="text-decoration: none; background-color: #f7fafc; color: #4a5568; padding: 8px 16px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.9rem; font-weight: 500;">
+    <div
+        style="margin-top: 2.5rem; border-top: 1px solid #edf2f7; padding-top: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+        <a href="{% url 'polls:detail' question.id %}"
+            style="text-decoration: none; background-color: #f7fafc; color: #4a5568; padding: 8px 16px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.9rem; font-weight: 500;">
             ← Vote again
         </a>
-        
+
         <span style="font-size: 0.85rem; color: #a0aec0; font-style: italic;">
             Live results
         </span>
     </div>
 </div>
+{% if question.id|stringformat:"s" in request.session.voted_polls %}
+<div
+    style="width: 600px; margin: 2rem auto; padding: 0; border: 1px solid #e2e8f0; border-radius: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08); background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); overflow: hidden;">
+    <div
+        style="padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #e2e8f0; background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.35rem; color: #0f172a;">{{ question.comment_set.count }} Comments</h2>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'polls:create_comment' question.id %}">
+        {% csrf_token %}
+        <div style="padding: 1rem;display:flex;flex-direction:column;margin-bottom : 1rem;" class="comment-container">
+            {% if messages %}
+                {% for message in messages %}
+                <div style="margin-bottom: 0.85rem; padding: 0.8rem 1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 600; {% if message.tags == 'success' %}background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;{% else %}background: #fef2f2; color: #991b1b; border: 1px solid #fecaca;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            <textarea
+                name="comment_text"
+                rows="3"
+                style="margin-bottom: 1rem; padding: 0.75rem 0.25rem; width: 100%; border-bottom: 1px solid black; border-top: 0; border-left: 0; border-right: 0; resize: vertical; background: transparent; font-size: 0.95rem; color: #0f172a; outline: none;"
+                placeholder="Write something here..." required></textarea>
+
+            <div class="button-group">
+                <button type="reset" style="padding: 0.55rem 0.9rem; border-radius: 999px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 600; cursor: pointer;">Cancel</button>
+                <button type="submit" style="padding: 0.55rem 1rem; border-radius: 999px; border: 0; background: #0f172a; color: #ffffff; font-weight: 700; cursor: pointer;">Comment</button>
+            </div>
+        </div>
+    </form>
+    {% for comment in sorted_comments %}
+    <div
+        style="display: flex; gap: 0.9rem; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 14px; background-color: #ffffff; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04); {% if not forloop.last %}margin-bottom: 0.9rem;{% endif %}">
+        <div
+            style="width: 42px; height: 42px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #111827 0%, #475569 100%); color: #ffffff; font-weight: 700; font-size: 1rem; text-transform: uppercase;">
+            {% if comment.creator %}{{ comment.creator.username|first }}{% else %}?{% endif %}
+        </div>
+        <div style="min-width: 0; flex: 1;">
+            <div
+                style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.45rem;">
+                <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;">
+                    <span style="font-size: 0.96rem; font-weight: 700; color: #0f172a;">
+                        {% if comment.creator %}{{ comment.creator.username }}{% else %}Deleted user{% endif %}
+                    </span>
+                    <span
+                        style="font-size: 0.78rem; color: #64748b; padding: 0.18rem 0.45rem; border-radius: 999px;">
+                        {{ comment.created_at|date:"M j, Y" }}
+                    </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+                    <button
+                        style="font-size: 0.76rem; padding: 0.22rem 0.5rem; border-radius: 999px; font-weight: 600; cursor: pointer;">
+                        {{ comment.likes }} &#128077; 
+                    </button>
+                    <button
+                        style="font-size: 0.76rem; padding: 0.22rem 0.5rem; border-radius: 999px; font-weight: 600; cursor: pointer;">
+                        {{ comment.dislikes }} &#x1F44E;
+                    </button>
+                </div>
+            </div>
+            <p style="margin: 0; font-size: 0.95rem; line-height: 1.6; color: #334155;">
+                {{ comment.text }}
+            </p>
+        </div>
+    </div>
+    {% empty %}
+    <div style="padding: 2rem 1.25rem; text-align: center; background-color: rgba(248, 250, 252, 0.9);">
+        <p style="margin: 0; font-size: 1rem; color: #334155; font-weight: 600;">No comments yet.</p>
+        <p style="margin: 0.35rem 0 0; font-size: 0.9rem; color: #64748b;">Be the first person to start the discussion
+            for this poll.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 {% endblock %}
+
